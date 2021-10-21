@@ -163,6 +163,7 @@ class OrgUnit(models.Model):
     )
     exist = models.BooleanField(                                # Подразделение существует или упразднено?
         verbose_name='Подразделение существует?',
+        default=True,
     )
 
     def __repr__(self):
