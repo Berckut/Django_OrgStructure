@@ -41,10 +41,31 @@ class ORD(models.Model):
 
 # Вид реорганизации
 class TypeReorganization(models.Model):
-    type_reorganization = models.CharField(max_length=100)  # Вид реорганизации
+    type_reorganization = models.CharField(                 # Вид реорганизации
+        verbose_name='Вид реорганизации',
+        max_length=100,
+        unique=True,
+        null=False,
+        blank=False,
+    )
+    description = models.CharField(                 # Описание
+        verbose_name='Описание',
+        max_length=250,
+        null=True,
+        blank=True,
+    )
+
+    def __repr__(self):
+        return (f'{self.__class__.__name__}('
+                f'{self.type_reorganization})')
 
     def __str__(self):
         return self.type_reorganization
+
+    class Meta:
+        verbose_name = 'Вид реорганизации'                  # Читабельное название модели, в единственном числе
+        verbose_name_plural = 'Виды реорганизации'          # Название модели в множественном числе
+        ordering = ['type_reorganization']                  # Сортировка
 
 
 # Реорганизация
