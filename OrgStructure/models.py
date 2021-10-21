@@ -1,4 +1,5 @@
 from django.db import models
+import datetime
 from mptt.models import MPTTModel, TreeForeignKey
 
 # Create your models here.
@@ -6,12 +7,36 @@ from mptt.models import MPTTModel, TreeForeignKey
 
 # Организационно-распорядительный документ
 class ORD(models.Model):
-    number = models.CharField(max_length=20)    # Номер организационно-распорядительного документа
-    date = models.DateField()                   # Дата документа
-    name = models.CharField(max_length=200)     # Название документа
+    number = models.CharField(                  # Номер документа
+        verbose_name='Номер документа',
+        max_length=20,
+        null=True,
+        blank=True,
+    )
+    date = models.DateField(                    # Дата документа
+        verbose_name='Дата документа',
+        default=datetime.date.today,
+    )
+    name = models.CharField(                    # Название документа
+        verbose_name='Название документа',
+        max_length=200,
+    )
+
+    def __repr__(self):
+        return (f'{self.__class__.__name__}('
+                f'{self.date.strftime("%Y.%m.%d")}, {self.number}, "{self.name}")')
 
     def __str__(self):
-        return f'{self.date.year}.{self.date.month}.{self.date.day} {self.number} {self.name}'
+        if self.number:
+            return f'{self.date.strftime("%Y.%m.%d")} № {self.number} "{self.name}"'
+        else:
+            return f'{self.date.strftime("%Y.%m.%d")} {self.name}'
+
+    class Meta:
+        verbose_name = 'ОРД'                                # Читабельное название модели, в единственном числе
+        verbose_name_plural = 'ОРД'                         # Название модели в множественном числе
+        ordering = ['-date', '-number']                     # Сортировка
+        unique_together = ('number', 'date', 'name')        # Комбинация полей, которая должна быть уникальной
 
 
 # Вид реорганизации
