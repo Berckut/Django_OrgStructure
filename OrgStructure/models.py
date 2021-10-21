@@ -120,40 +120,76 @@ class Reorganization(models.Model):
 
 # Подразделение
 class OrgUnit(models.Model):
-    current_name = models.CharField(max_length=200)             # Текущее наименование (например, Общий отдел)
+    current_name = models.CharField(                            # Текущее наименование (например, Общий отдел)
+        verbose_name='Текущее наименование',
+        max_length=200
+    )
     current_short_name = models.CharField(                      # Текущая аббревиатура (например, ОО)
+        verbose_name='Текущая аббривеатура',
         max_length=20,
         null=True,
         blank=True,
     )
     current_structure_code = models.CharField(                  # Текущий структруный код (например, 31-02)
+        verbose_name='Текущий структурный код',
         max_length=50,
         null=True,
         blank=True,
     )
-    date_creation = models.DateField()                          # Дата создания
+    date_creation = models.DateField(                           # Дата создания
+        verbose_name='Дата создания',
+        default=datetime.date.today,
+    )
     reason_creation = models.ForeignKey(                        # Причина создания
         Reorganization,
+        verbose_name='Причина создания',
         related_name='org_unit_creation',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
     )
     date_abolition = models.DateField(                          # Дата упразднения
+        verbose_name='Дата упразднения',
         null=True,
         blank=True,
     )
     reason_abolition = models.ForeignKey(                       # Причина упразднения
         Reorganization,
+        verbose_name='Причина упразднения',
         related_name='org_unit_abolition',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
     )
-    exist = models.BooleanField()                               # Подразделение существует или упразднено?
+    exist = models.BooleanField(                                # Подразделение существует или упразднено?
+        verbose_name='Подразделение существует?',
+    )
+
+    def __repr__(self):
+        result = f'{self.__class__.__name__}('
+
+        if self.current_structure_code:
+            result += f'{self.current_structure_code} '
+
+        if self.current_short_name:
+            result += f'{self.current_short_name}, '
+        else:
+            result += f'{self.current_name}, '
+
+        result += f'{self.date_creation.strftime("%Y.%m.%d")}, {self.exist})'
+
+        return result
 
     def __str__(self):
         return self.current_name
+
+    class Meta:
+        verbose_name = 'подразделение'                          # Читабельное название модели, в единственном числе
+        verbose_name_plural = 'Подразделения'                   # Название модели в множественном числе
+        ordering = [                                            # Сортировка
+            'current_name',
+            '-date_creation',
+        ]
 
 
 # Структурная единица
