@@ -72,23 +72,50 @@ class TypeReorganization(models.Model):
 class Reorganization(models.Model):
     type_reorganization = models.ForeignKey(                # Вид реорганизации
         TypeReorganization,
+        verbose_name='Вид реорганизации',
         related_name='reorganization',
         on_delete=models.SET_NULL,
         null=True,
         blank=False,
     )
-    date = models.DateField()                               # Дата события
+    date = models.DateField(                                # Дата события
+        verbose_name='Дата события',
+        default=datetime.date.today,
+    )
     ord_reason = models.ForeignKey(                         # Причина реорганизации (ОРД)
         ORD,
+        verbose_name='Причина реорганизации (ОРД)',
         related_name='reorganization',
         on_delete=models.SET_NULL,
         null=True,
-        blank=False,
+        blank=True,
     )
-    note = models.CharField(max_length=200)                 # Описание события
+    note = models.CharField(                                # Описание события
+        verbose_name='Описание события',
+        max_length=250
+    )
+
+    def __repr__(self):
+        return (f'{self.__class__.__name__}('
+                f'{self.type_reorganization}, {self.date.strftime("%Y.%m.%d")}, "{self.note}")')
 
     def __str__(self):
-        return f'{self.date.year}.{self.date.month}.{self.date.day} {self.note}'
+        return f'{self.date.strftime("%Y.%m.%d")} {self.note}'
+
+    class Meta:
+        verbose_name = 'реогранизацию'                          # Читабельное название модели, в единственном числе
+        verbose_name_plural = 'Изменения структуры'             # Название модели в множественном числе
+        ordering = [                                            # Сортировка
+            '-date',
+            'ord_reason',
+            'type_reorganization',
+        ]
+        unique_together = (                                     # Комбинация полей, которая должна быть уникальной
+            'type_reorganization',
+            'date',
+            'ord_reason',
+            'note',
+        )
 
 
 # Подразделение
