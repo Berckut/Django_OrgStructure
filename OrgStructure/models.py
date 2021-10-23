@@ -197,49 +197,98 @@ class OrgUnit(models.Model):
 class StructureUnit(MPTTModel):
     org_unit = models.ForeignKey(                           # Подразделение
         OrgUnit,
+        verbose_name='Подразделение',
         related_name='structure_unit',
         on_delete=models.SET_NULL,
         null=True,
-        blank=False,
+        blank=True,
     )
-    name = models.CharField(max_length=200)                 # Наименование (например, Общий отдел)
+    name = models.CharField(                                # Наименование (например, Общий отдел)
+        verbose_name='Наименование',
+        max_length=200
+    )
     short_name = models.CharField(                          # Аббревиатура (например, ОО)
+        verbose_name='Аббревиатура',
         max_length=20,
         null=True,
         blank=True,
     )
     structure_code = models.CharField(                      # Структруный код (например, 31-02)
+        verbose_name='Структруный код',
         max_length=50,
         null=True,
         blank=True,
     )
     parent = TreeForeignKey(                                # Подчиняется
         'self',
+        verbose_name='Подчиняется',
         related_name='subject',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
     )
-    date_creation = models.DateField()                      # Дата создания (присвоения наименования)
-    reason_creation = models.ForeignKey(                    # Причина создания
+    date_creation = models.DateField(                       # Дата ввода в структуру (присвоения наименования)
+        verbose_name='Дата ввода в структуру',
+        default=datetime.date.today,
+    )
+    reason_creation = models.ForeignKey(                    # Причина ввода
         Reorganization,
+        verbose_name='Причина ввода',
         related_name='structure_unit_creation',
         on_delete=models.SET_NULL,
         null=True,
         blank=False,
     )
     date_excluding = models.DateField(                      # Дата исключения из структуры
+        verbose_name='Дата исключения из структуры',
         null=True,
         blank=True,
     )
     reason_excluding = models.ForeignKey(                   # Причина исключения
         Reorganization,
+        verbose_name='Причина исключения',
         related_name='structure_unit_excluding',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
     )
-    exist = models.BooleanField()                           # Дейтвующее наименование?
+    exist = models.BooleanField(                            # Дейтвующее наименование?
+        verbose_name='Действующее?',
+        default=True,
+    )
+
+    def __repr__(self):
+        result = f'{self.__class__.__name__}('
+
+        if self.structure_code:
+            result += f'{self.structure_code} '
+
+        if self.short_name:
+            result += f'{self.short_name}, '
+        else:
+            result += f'{self.name}, '
+
+        result += f'{self.date_creation.strftime("%Y.%m.%d")}, {self.exist}'
+
+        if self.parent:
+            result += f', {self.parent}'
+
+        result += ')'
+
+        return result
 
     def __str__(self):
+        if self.structure_code:
+            return f'{self.structure_code} {self.name}'
+
         return self.name
+
+    class Meta:
+        verbose_name = 'структурную единицу'  # Читабельное название модели, в единственном числе
+        verbose_name_plural = 'Структура'  # Название модели в множественном числе
+
+    class MPTTMeta:
+        order_insertion_by = [                              # Сортировка узлов дерева подразделений
+            'structure_code',
+            'name',
+        ]
