@@ -5,8 +5,10 @@ from mptt.models import MPTTModel, TreeForeignKey
 # Create your models here.
 
 
-# Организационно-распорядительный документ
 class ORD(models.Model):
+    """
+    Модель "Организационно-распорядительный документ"
+    """
     number = models.CharField(                  # Номер документа
         verbose_name='Номер документа',
         max_length=20,
@@ -39,8 +41,10 @@ class ORD(models.Model):
         unique_together = ('number', 'date', 'name')        # Комбинация полей, которая должна быть уникальной
 
 
-# Вид реорганизации
 class TypeReorganization(models.Model):
+    """
+    Модель "Вид реорганизации"
+    """
     type_reorganization = models.CharField(                 # Вид реорганизации
         verbose_name='Вид реорганизации',
         max_length=100,
@@ -68,8 +72,10 @@ class TypeReorganization(models.Model):
         ordering = ['type_reorganization']                  # Сортировка
 
 
-# Реорганизация
 class Reorganization(models.Model):
+    """
+    Модель "Реорганизация"
+    """
     type_reorganization = models.ForeignKey(                # Вид реорганизации
         TypeReorganization,
         verbose_name='Вид реорганизации',
@@ -118,8 +124,10 @@ class Reorganization(models.Model):
         )
 
 
-# Подразделение
 class OrgUnit(models.Model):
+    """
+    Модель "Подразделение"
+    """
     current_name = models.CharField(                            # Текущее наименование (например, Общий отдел)
         verbose_name='Текущее наименование',
         max_length=200
@@ -193,8 +201,10 @@ class OrgUnit(models.Model):
         ]
 
 
-# Структурная единица
 class StructureUnit(MPTTModel):
+    """
+    Модель "Структурная единица"
+    """
     org_unit = models.ForeignKey(                           # Подразделение
         OrgUnit,
         verbose_name='Подразделение',
