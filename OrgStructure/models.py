@@ -41,47 +41,28 @@ class ORD(models.Model):
         unique_together = ('number', 'date', 'name')        # Комбинация полей, которая должна быть уникальной
 
 
-class TypeReorganization(models.Model):
-    """
-    Модель "Вид реорганизации"
-    """
-    type_reorganization = models.CharField(                 # Вид реорганизации
-        verbose_name='Вид реорганизации',
-        max_length=100,
-        unique=True,
-        null=False,
-        blank=False,
-    )
-    description = models.CharField(                 # Описание
-        verbose_name='Описание',
-        max_length=250,
-        null=True,
-        blank=True,
-    )
-
-    def __repr__(self):
-        return (f'{self.__class__.__name__}('
-                f'{self.type_reorganization})')
-
-    def __str__(self):
-        return self.type_reorganization
-
-    class Meta:
-        verbose_name = 'Вид реорганизации'                  # Читабельное название модели, в единственном числе
-        verbose_name_plural = 'Виды реорганизации'          # Название модели в множественном числе
-        ordering = ['type_reorganization']                  # Сортировка
-
-
 class Reorganization(models.Model):
     """
     Модель "Реорганизация"
     """
-    type_reorganization = models.ForeignKey(                # Вид реорганизации
-        TypeReorganization,
+
+    class TypeOfReorganization(models.TextChoices):
+        """
+        Вид реорганизации
+        """
+        CREATION = 'cr', 'Создание'
+        ABOLITION = 'ab', 'Упразднение'
+        ALLOCATION = 'al', 'Выделение'      # выделение - подразделения А возникает отдел Б, при этом существуют оба
+        TRANSFORMATION = 'tr', 'Преобразование'     # изменение свойств, в т.ч., переименование
+        JOINING = 'jo', 'Присоединение'     # к подразделению А присоединяется Б, при этом Б перестает существовать
+        PARTITION = 'pa', 'Разделение'      # из отдела А образуются отделы Б и В, при этом А перестает существовать
+        MERGING = 'me', 'Слияние'       # из отделов А и Б возникает отдел В, при этом А и Б перестают существовать
+
+    type_of_reorganization = models.CharField(      # Вид реорганизации
+        choices=TypeOfReorganization.choices,
+        max_length=2,
         verbose_name='Вид реорганизации',
-        related_name='reorganization',
-        on_delete=models.SET_NULL,
-        null=True,
+        null=False,
         blank=False,
     )
     date = models.DateField(                                # Дата события
@@ -103,7 +84,7 @@ class Reorganization(models.Model):
 
     def __repr__(self):
         return (f'{self.__class__.__name__}('
-                f'{self.type_reorganization}, {self.date.strftime("%Y.%m.%d")}, "{self.note}")')
+                f'{self.type_of_reorganization}, {self.date.strftime("%Y.%m.%d")}, "{self.note}")')
 
     def __str__(self):
         return f'{self.date.strftime("%Y.%m.%d")} {self.note}'
@@ -114,10 +95,10 @@ class Reorganization(models.Model):
         ordering = [                                            # Сортировка
             '-date',
             'ord_reason',
-            'type_reorganization',
+            'type_of_reorganization',
         ]
         unique_together = (                                     # Комбинация полей, которая должна быть уникальной
-            'type_reorganization',
+            'type_of_reorganization',
             'date',
             'ord_reason',
             'note',
